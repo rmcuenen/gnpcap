@@ -18,11 +18,12 @@
             <artifactId>pcap4j-core</artifactId>
             <version>${pcap4j.version}</version>
         </dependency>
-        <!--<dependency>
+        <dependency>
             <groupId>org.pcap4j</groupId>
             <artifactId>pcap4j-packetfactory-static</artifactId>
             <version>${pcap4j.version}</version>
-        </dependency>-->
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
