@@ -13,7 +13,7 @@ import org.pcap4j.packet.namednumber.DataLinkType;
 import org.pcap4j.util.ByteArrays;
 import static org.pcap4j.util.ByteArrays.*;
 
-public class CohdaWirelessPacket extends AbstractPacket {
+public final class CohdaWirelessPacket extends AbstractPacket {
 
     private final CohdaWirelessHeader header;
     private final Packet payload;
@@ -81,8 +81,8 @@ public class CohdaWirelessPacket extends AbstractPacket {
 
         private byte channelNumber;
         private byte priority;
-        private byte service; // Tagged?
-        private byte mcs; // Tagged?
+        private byte service; // NamedNumber?
+        private byte mcs; // NamedNumber?
         private short rxPowerA;
         private short rxPowerB;
         private short rxNoiseA;
@@ -246,8 +246,8 @@ public class CohdaWirelessPacket extends AbstractPacket {
 
         private final byte channelNumber;
         private final byte priority;
-        private final byte service; // Tagged?
-        private final byte mcs; // Tagged?
+        private final byte service; // NamedNumber?
+        private final byte mcs; // NamedNumber?
         private final short rxPowerA;
         private final short rxPowerB;
         private final short rxNoiseA;
@@ -389,41 +389,41 @@ public class CohdaWirelessPacket extends AbstractPacket {
         protected String buildString() {
             final StringBuilder sb = new StringBuilder();
             final String ls = System.getProperty("line.separator");
-            sb.append("Cohda Wireless proprietary").append(ls);
-            sb.append("  ").append("ChannelNuhmber: ").append(channelNumber & 0xFF).append(ls);
-            sb.append("  ").append("Priority: ").append(priority & 0xFF).append(ls);
-            sb.append("  ").append("Service: ").append(service & 0xFF).append(ls); // Tagged?
-            sb.append("  ").append("MCS: ").append(mcs & 0xFF).append(ls); // Tagged?
+            sb.append("[Cohda Header (").append(length()).append(" bytes)]").append(ls);
+            sb.append("  ChannelNuhmber: ").append(channelNumber & 0xFF).append(ls);
+            sb.append("  Priority: ").append(priority & 0xFF).append(ls);
+            sb.append("  Service: ").append(service & 0xFF).append(ls); // NamedNumber?
+            sb.append("  MCS: ").append(mcs & 0xFF).append(ls); // NamedNumber?
             final NumberFormat f = NumberFormat.getNumberInstance();
             f.setGroupingUsed(false);
             f.setMinimumIntegerDigits(1);
             f.setMinimumFractionDigits(1);
             f.setMaximumFractionDigits(1);
-            sb.append("  ").append("RxPowerA: ").append(f.format(rxPowerA / 2.0));
+            sb.append("  RxPowerA: ").append(f.format(rxPowerA / 2.0));
             sb.append(" dB (").append(rxPowerA).append(')').append(ls);
-            sb.append("  ").append("RxPowerB: ").append(f.format(rxPowerB / 2.0));
+            sb.append("  RxPowerB: ").append(f.format(rxPowerB / 2.0));
             sb.append(" dB (").append(rxPowerB).append(')').append(ls);
-            sb.append("  ").append("RxNoiseA: ").append(f.format(rxNoiseA / 2.0));
+            sb.append("  RxNoiseA: ").append(f.format(rxNoiseA / 2.0));
             sb.append(" dB (").append(rxNoiseA).append(')').append(ls);
-            sb.append("  ").append("RxNoiseB: ").append(f.format(rxNoiseB / 2.0));
+            sb.append("  RxNoiseB: ").append(f.format(rxNoiseB / 2.0));
             sb.append(" dB (").append(rxNoiseB).append(')').append(ls);
-            sb.append("  ").append("Reserved: ").append(reserved & 0xFFFFFFFFL).append(ls);
+            sb.append("  Reserved: ").append(reserved & 0xFFFFFFFFL).append(ls);
             final long quot = (tsf >>> 1) / 5;
             final long rem = tsf - quot * 10;
             final BigDecimal dec = new BigDecimal(Long.toString(quot) + rem).divide(BigDecimal.TEN.pow(6));
             f.setMinimumFractionDigits(6);
             f.setMaximumFractionDigits(6);
-            sb.append("  ").append("TSF: ").append(f.format(dec.doubleValue()));
+            sb.append("  TSF: ").append(f.format(dec.doubleValue()));
             sb.append("s (").append(Long.toString(quot)).append(rem).append(')').append(ls);
-            sb.append("  ").append("IdlePower: ").append(idlePower & 0xFF).append(ls);
+            sb.append("  IdlePower: ").append(idlePower & 0xFF).append(ls);
             final double val = chUtilPer & 0xFFFF;
             f.setMinimumFractionDigits(1);
             f.setMaximumFractionDigits(1);
-            sb.append("  ").append("Ch.Util: ").append(f.format(100.0 * (chUtil & 0xFF) / val));
+            sb.append("  Ch.Util: ").append(f.format(100.0 * (chUtil & 0xFF) / val));
             sb.append(" % (").append(chUtil & 0xFF).append(')').append(ls);
-            sb.append("  ").append("Ch.Util Per: ").append(chUtilPer & 0xFFFF).append(ls);
-            sb.append("  ").append("FineFreq: ").append(fineFreq & 0x00FFFFFFL).append(ls);
-            sb.append("  ").append("Trice: ").append(trice & 0xFF).append(ls);
+            sb.append("  Ch.Util Per: ").append(chUtilPer & 0xFFFF).append(ls);
+            sb.append("  FineFreq: ").append(fineFreq & 0x00FFFFFFL).append(ls);
+            sb.append("  Trice: ").append(trice & 0xFF).append(ls);
             return sb.toString();
         }
 
