@@ -35,12 +35,11 @@ public final class GnAddress extends LinkLayerAddress {
     }
 
     public ItsStationType getStationType() {
-        return ItsStationType.getInstance(getAddress()[0] & 0x7C);
+        return ItsStationType.getInstance((getAddress()[0] & 0x7C) >> 2);
     }
 
     public int getCountryCode() {
-        int cc = (getAddress()[0] & 0x03) << 8;
-        return cc | getAddress()[1];
+        return ((getAddress()[0] & 0x03) << 8) | (getAddress()[1] & 0xFF);
     }
 
     public LinkLayerAddress getLinkLayerAddress() {

@@ -5,21 +5,13 @@ import static org.pcap4j.util.ByteArrays.*;
 public final class BitValues {
 
     public static int getValue(byte value, int offset, int length) {
-        return getValue(offset, offset, length, BYTE_SIZE_IN_BITS);
-    }
-
-    public static int getValue(short value, int offset, int length) {
-        return getValue(offset, offset, length, BYTE_SIZE_IN_BITS * SHORT_SIZE_IN_BYTES);
-    }
-
-    private static int getValue(int value, int offset, int length, int size) {
         if (length == 0) {
             throw new IllegalArgumentException("length is zero.");
         }
-        if (offset < 0 || length < 0 || offset + length > size) {
+        if (offset < 0 || length < 0 || offset + length > BYTE_SIZE_IN_BITS) {
             throw new ArrayIndexOutOfBoundsException();
         }
-        int shift = size - offset - length;
+        int shift = BYTE_SIZE_IN_BITS - offset - length;
         int mask = (1 << length) - 1;
         return (value >> shift) & mask;
     }

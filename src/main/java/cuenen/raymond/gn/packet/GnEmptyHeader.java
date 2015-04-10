@@ -1,9 +1,10 @@
 package cuenen.raymond.gn.packet;
 
-import cuenen.raymond.gn.packet.GeoNetworkingPacket.GnHeader;
+import cuenen.raymond.gn.packet.GeoNetworkingPacket.GnPacketHeader;
+import cuenen.raymond.gn.util.LongPositionVector;
 import org.pcap4j.util.ByteArrays;
 
-public final class GnEmptyHeader implements GnHeader {
+public final class GnEmptyHeader implements GnPacketHeader {
 
     /**
      * A static factory method. This method validates the arguments by
@@ -21,6 +22,11 @@ public final class GnEmptyHeader implements GnHeader {
     }
 
     private GnEmptyHeader(byte[] rawData, int offset, int length) {
+    }
+
+    @Override
+    public LongPositionVector sourcePosition() {
+        return null;
     }
 
     @Override

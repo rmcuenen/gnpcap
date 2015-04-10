@@ -1,10 +1,11 @@
 package cuenen.raymond.gn.packet;
 
-import cuenen.raymond.gn.packet.GeoNetworkingPacket.GnHeader;
+import cuenen.raymond.gn.packet.GeoNetworkingPacket.GnPacketHeader;
+import cuenen.raymond.gn.util.LongPositionVector;
 import java.util.Arrays;
 import org.pcap4j.util.ByteArrays;
 
-public final class GnMalformedHeader implements GnHeader {
+public final class GnMalformedHeader implements GnPacketHeader {
 
     private final byte[] data;
 
@@ -25,6 +26,11 @@ public final class GnMalformedHeader implements GnHeader {
 
     private GnMalformedHeader(byte[] rawData, int offset, int length) {
         data = ByteArrays.getSubArray(rawData, offset, length);
+    }
+
+    @Override
+    public LongPositionVector sourcePosition() {
+        return null;
     }
 
     @Override

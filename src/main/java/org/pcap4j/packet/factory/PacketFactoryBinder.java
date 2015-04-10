@@ -1,9 +1,11 @@
 package org.pcap4j.packet.factory;
 
 import cuenen.raymond.gn.packet.GeoNetworkingPacket.GnHeader;
+import cuenen.raymond.gn.packet.GeoNetworkingPacket.GnPacketHeader;
 import cuenen.raymond.gn.packet.factory.GnDataLinkTypePacketFactory;
 import cuenen.raymond.gn.packet.factory.GnEtherTypePacketFactory;
 import cuenen.raymond.gn.packet.factory.GnHeaderTypeFactory;
+import cuenen.raymond.gn.packet.factory.GnPacketHeaderTypeFactory;
 import java.util.HashMap;
 import java.util.Map;
 import org.pcap4j.packet.Packet;
@@ -22,6 +24,7 @@ final class PacketFactoryBinder {
         packetFactories.put(DataLinkType.class, GnDataLinkTypePacketFactory.getInstance());
         packetFactories.put(EtherType.class, GnEtherTypePacketFactory.getInstance());
         packetpPieceFactories.put(GnHeader.class, GnHeaderTypeFactory.getInstance());
+        packetpPieceFactories.put(GnPacketHeader.class, GnPacketHeaderTypeFactory.getInstance());
     }
 
     public static PacketFactoryBinder getInstance() {

@@ -1,6 +1,8 @@
 package cuenen.raymond.gn.packet;
 
 import cuenen.raymond.gn.packet.namednumber.GnHeaderType;
+import cuenen.raymond.gn.packet.namednumber.GnPacketHeaderType;
+import cuenen.raymond.gn.util.LongPositionVector;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -124,6 +126,12 @@ public final class GeoNetworkingPacket extends AbstractPacket {
                     .newInstance(rawData, offset + size, length - size, basicHeader.getNextHeader());
             structure.add(nextHeader);
             size += nextHeader.length();
+            if (nextHeader instanceof GnCommonHeader) {
+                nextHeader = PacketFactories.getFactory(GnPacketHeader.class, GnPacketHeaderType.class)
+                        .newInstance(rawData, offset + size, length - size, ((GnCommonHeader) nextHeader).getExtendedHeader());
+                structure.add(nextHeader);
+                size += nextHeader.length();
+            }
             this.length = size;
         }
 
@@ -185,15 +193,8 @@ public final class GeoNetworkingPacket extends AbstractPacket {
         public byte[] rawData();
     }
 
-    private static String toBinaryString(int value, int bits) {
-        final StringBuilder sb = new StringBuilder();
-        for (int i = 1 << (bits - 1); i > 0; i /= 2) {
-            if ((value & i) != 0) {
-                sb.append('1');
-            } else {
-                sb.append('0');
-            }
-        }
-        return sb.toString();
+    public static interface GnPacketHeader extends GnHeader {
+
+        public LongPositionVector sourcePosition();
     }
 }
