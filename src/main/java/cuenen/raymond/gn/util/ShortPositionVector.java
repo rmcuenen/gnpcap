@@ -1,7 +1,6 @@
 package cuenen.raymond.gn.util;
 
 import cuenen.raymond.gn.packet.namednumber.ItsStationType;
-import static cuenen.raymond.gn.util.LongPositionVector.SIZE_IN_BYTES;
 import org.pcap4j.packet.IllegalRawDataException;
 import org.pcap4j.util.ByteArrays;
 import static org.pcap4j.util.ByteArrays.INT_SIZE_IN_BYTES;
@@ -11,16 +10,12 @@ public class ShortPositionVector {
     private static final int GN_ADDR_OFFSET = 0;
     private static final int TST_OFFSET = GN_ADDR_OFFSET + GnAddress.SIZE_IN_BYTES;
     private static final int TST_SIZE = INT_SIZE_IN_BYTES;
-    private static final int LAT_OFFSET = TST_OFFSET + TST_SIZE;
-    private static final int LAT_SIZE = INT_SIZE_IN_BYTES;
-    private static final int LONG_OFFSET = LAT_OFFSET + LAT_SIZE;
-    private static final int LONG_SIZE = INT_SIZE_IN_BYTES;
-    public static final int SIZE_IN_BYTES = LONG_OFFSET + LONG_SIZE;
+    private static final int GEO_POSITION_OFFSET = TST_OFFSET + TST_SIZE;
+    public static final int SIZE_IN_BYTES = GEO_POSITION_OFFSET + GeoPosition.SIZE_IN_BYTES;
 
     private final GnAddress gnAddress;
     private final int tst;
-    private final int latitude;
-    private final int longitude;
+    private final GeoPosition position;
 
     /**
      * A static factory method. This method validates the arguments by
@@ -44,8 +39,7 @@ public class ShortPositionVector {
         }
         gnAddress = GnAddress.getByAddress(ByteArrays.getSubArray(rawData, GN_ADDR_OFFSET + offset, GnAddress.SIZE_IN_BYTES));
         tst = ByteArrays.getInt(rawData, TST_OFFSET + offset);
-        latitude = ByteArrays.getInt(rawData, LAT_OFFSET + offset);
-        longitude = ByteArrays.getInt(rawData, LONG_OFFSET + offset);
+        position = GeoPosition.newInstance(rawData, GEO_POSITION_OFFSET + offset, length - GEO_POSITION_OFFSET);
     }
 
     public GnAddress getGnAddress() {
@@ -56,12 +50,8 @@ public class ShortPositionVector {
         return tst;
     }
 
-    public int getLatitude() {
-        return latitude;
-    }
-
-    public int getLongitude() {
-        return longitude;
+    public GeoPosition getPosition() {
+        return position;
     }
 
     public void writeTo(byte[] rawData, int offset) {
@@ -71,14 +61,7 @@ public class ShortPositionVector {
         rawData[TST_OFFSET + 1] = (byte) (tst << 16);
         rawData[TST_OFFSET + 2] = (byte) (tst << 8);
         rawData[TST_OFFSET + 3] = (byte) tst;
-        rawData[LAT_OFFSET] = (byte) (latitude << 24);
-        rawData[LAT_OFFSET + 1] = (byte) (latitude << 16);
-        rawData[LAT_OFFSET + 2] = (byte) (latitude << 8);
-        rawData[LAT_OFFSET + 3] = (byte) latitude;
-        rawData[LONG_OFFSET] = (byte) (longitude << 24);
-        rawData[LONG_OFFSET + 1] = (byte) (longitude << 16);
-        rawData[LONG_OFFSET + 2] = (byte) (longitude << 8);
-        rawData[LONG_OFFSET + 3] = (byte) longitude;
+        position.writeTo(rawData, GEO_POSITION_OFFSET);
     }
 
     public String buildString(String prefix) {
@@ -97,12 +80,7 @@ public class ShortPositionVector {
         sb.append(" = Country Code: ").append(countryCode).append(ls);
         sb.append(prefix).append("  Link-Layer Address: ").append(gnAddress.getLinkLayerAddress()).append(ls);
         sb.append(prefix).append("Timestamp: ").append(tst & 0xFFFFFFFFL).append(ls);
-        final long lat = latitude & 0xFFFFFFFFL;
-        final long lon = longitude & 0xFFFFFFFFL;
-        sb.append(prefix).append("Latitude: ").append(fromDecimal(lat / 1E7, "NS"));
-        sb.append(" (").append(lat).append(')').append(ls);
-        sb.append(prefix).append("Longitude: ").append(fromDecimal(lon / 1E7, "EW"));
-        sb.append(" (").append(lon).append(')').append(ls);
+        sb.append(position.buildString(prefix));
         return sb.toString();
     }
 
@@ -117,8 +95,7 @@ public class ShortPositionVector {
             ShortPositionVector that = (ShortPositionVector) obj;
             return this.gnAddress == that.gnAddress
                     && this.tst == that.tst
-                    && this.latitude == that.latitude
-                    && this.longitude == that.longitude;
+                    && this.position.equals(that.position);
         }
         return false;
     }
@@ -128,16 +105,7 @@ public class ShortPositionVector {
         int hash = 1;
         hash = hash * 41 + gnAddress.hashCode();
         hash = hash * 41 + tst;
-        hash = hash * 41 + latitude;
-        hash = hash * 41 + longitude;
+        hash = hash * 41 + position.hashCode();
         return hash;
-    }
-
-    private String fromDecimal(double deg, String dir) {
-        final double frac = (deg * 3600) % 3600;
-        final int min = (int) (frac / 60);
-        final double sec = frac % 60;
-        final char h = dir.charAt(deg < 0 ? 1 : 0);
-        return String.format("%02d\u00b0%02d'%4.02f\"%c", (int) deg, min, sec, h);
     }
 }

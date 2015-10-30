@@ -1,7 +1,8 @@
 package cuenen.raymond.gn.packet;
 
+import cuenen.raymond.gn.packet.namednumber.GnExtendedHeaderType;
 import cuenen.raymond.gn.packet.namednumber.GnHeaderType;
-import cuenen.raymond.gn.packet.namednumber.GnPacketHeaderType;
+import cuenen.raymond.gn.packet.namednumber.GnTransportType;
 import cuenen.raymond.gn.util.LongPositionVector;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -37,9 +38,16 @@ public final class GeoNetworkingPacket extends AbstractPacket {
     private GeoNetworkingPacket(byte[] rawData, int offset, int length) throws IllegalRawDataException {
         header = new GeoNetworkingHeader(rawData, offset, length);
         final int payloadLength = length - header.length();
-        if (payloadLength > 0) {
+        GnTransportType type = null;
+        for (GnHeader hdr : header.getStructure()) {
+            if (hdr instanceof GnCommonHeader) {
+                type = ((GnCommonHeader) hdr).getNextHeader();
+            }
+        }
+        if (payloadLength > 0 && type != null) {
             final int payloadOffset = offset + header.length();
-            payload = null; //TODO
+            payload = PacketFactories.getFactory(Packet.class, GnTransportType.class)
+                    .newInstance(rawData, payloadOffset, payloadLength, type);
         } else {
             payload = null;
         }
@@ -126,8 +134,14 @@ public final class GeoNetworkingPacket extends AbstractPacket {
                     .newInstance(rawData, offset + size, length - size, basicHeader.getNextHeader());
             structure.add(nextHeader);
             size += nextHeader.length();
+            if (nextHeader instanceof GnSecureHeader) {
+                nextHeader = PacketFactories.getFactory(GnHeader.class, GnHeaderType.class)
+                        .newInstance(rawData, offset + size, length - size, GnHeaderType.COMMON_HEADER);
+                structure.add(nextHeader);
+                size += nextHeader.length();
+            }
             if (nextHeader instanceof GnCommonHeader) {
-                nextHeader = PacketFactories.getFactory(GnPacketHeader.class, GnPacketHeaderType.class)
+                nextHeader = PacketFactories.getFactory(GnPacketHeader.class, GnExtendedHeaderType.class)
                         .newInstance(rawData, offset + size, length - size, ((GnCommonHeader) nextHeader).getExtendedHeader());
                 structure.add(nextHeader);
                 size += nextHeader.length();

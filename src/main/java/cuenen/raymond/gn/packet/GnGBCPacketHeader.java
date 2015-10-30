@@ -1,6 +1,7 @@
 package cuenen.raymond.gn.packet;
 
 import cuenen.raymond.gn.packet.GeoNetworkingPacket.GnPacketHeader;
+import cuenen.raymond.gn.util.GeoPosition;
 import cuenen.raymond.gn.util.LongPositionVector;
 import org.pcap4j.packet.IllegalRawDataException;
 import org.pcap4j.util.ByteArrays;
@@ -13,11 +14,8 @@ public class GnGBCPacketHeader implements GnPacketHeader {
     private static final int RESERVED1_OFFSET = SN_OFFSET + SN_SIZE;
     private static final int RESERVED1_SIZE = SHORT_SIZE_IN_BYTES;
     private static final int SO_PV_OFFSET = RESERVED1_OFFSET + RESERVED1_SIZE;
-    private static final int GEO_AREA_POS_LATITUDE_OFFSET = SO_PV_OFFSET + LongPositionVector.SIZE_IN_BYTES;
-    private static final int GEO_AREA_POS_LATITUDE_SIZE = INT_SIZE_IN_BYTES;
-    private static final int GEO_AREA_POS_LONGITUDE_OFFSET = GEO_AREA_POS_LATITUDE_OFFSET + GEO_AREA_POS_LATITUDE_SIZE;
-    private static final int GEO_AREA_POS_LONGITUDE_SIZE = INT_SIZE_IN_BYTES;
-    private static final int DISTANCE_A_OFFSET = GEO_AREA_POS_LONGITUDE_OFFSET + GEO_AREA_POS_LONGITUDE_SIZE;
+    private static final int GEO_AREA_POS_OFFSET = SO_PV_OFFSET + LongPositionVector.SIZE_IN_BYTES;
+    private static final int DISTANCE_A_OFFSET = GEO_AREA_POS_OFFSET + GeoPosition.SIZE_IN_BYTES;
     private static final int DISTANCE_A_SIZE = SHORT_SIZE_IN_BYTES;
     private static final int DISTANCE_B_OFFSET = DISTANCE_A_OFFSET + DISTANCE_A_SIZE;
     private static final int DISTANCE_B_SIZE = SHORT_SIZE_IN_BYTES;
@@ -30,8 +28,7 @@ public class GnGBCPacketHeader implements GnPacketHeader {
     private final short sequenceNumber;
     private final short reserved1;
     private final LongPositionVector source;
-    private final int latitude;
-    private final int longitude;
+    private final GeoPosition position;
     private final short distanceA;
     private final short distanceB;
     private final short angle;
@@ -60,8 +57,7 @@ public class GnGBCPacketHeader implements GnPacketHeader {
         sequenceNumber = ByteArrays.getShort(rawData, SN_OFFSET + offset);
         reserved1 = ByteArrays.getShort(rawData, RESERVED1_OFFSET + offset);
         source = LongPositionVector.newInstance(rawData, SO_PV_OFFSET + offset, length - SO_PV_OFFSET);
-        latitude = ByteArrays.getInt(rawData, GEO_AREA_POS_LATITUDE_OFFSET + offset);
-        longitude = ByteArrays.getInt(rawData, GEO_AREA_POS_LONGITUDE_OFFSET + offset);
+        position = GeoPosition.newInstance(rawData, GEO_AREA_POS_OFFSET + offset, length - GEO_AREA_POS_OFFSET);
         distanceA = ByteArrays.getShort(rawData, DISTANCE_A_OFFSET + offset);
         distanceB = ByteArrays.getShort(rawData, DISTANCE_B_OFFSET + offset);
         angle = ByteArrays.getShort(rawData, ANGLE_OFFSET + offset);
@@ -81,12 +77,8 @@ public class GnGBCPacketHeader implements GnPacketHeader {
         return source;
     }
 
-    public int getLatitude() {
-        return latitude;
-    }
-
-    public int getLongitude() {
-        return longitude;
+    public GeoPosition getPosition() {
+        return position;
     }
 
     public short getDistanceA() {
@@ -118,14 +110,7 @@ public class GnGBCPacketHeader implements GnPacketHeader {
         rawData[RESERVED1_OFFSET] = (byte) (reserved1 >> 8);
         rawData[RESERVED1_OFFSET + 1] = (byte) reserved1;
         source.writeTo(rawData, SO_PV_OFFSET);
-        rawData[GEO_AREA_POS_LATITUDE_OFFSET] = (byte) (latitude >> 24);
-        rawData[GEO_AREA_POS_LATITUDE_OFFSET + 1] = (byte) (latitude >> 16);
-        rawData[GEO_AREA_POS_LATITUDE_OFFSET + 2] = (byte) (latitude >> 8);
-        rawData[GEO_AREA_POS_LATITUDE_OFFSET + 3] = (byte) latitude;
-        rawData[GEO_AREA_POS_LONGITUDE_OFFSET] = (byte) (longitude >> 24);
-        rawData[GEO_AREA_POS_LONGITUDE_OFFSET + 1] = (byte) (longitude >> 16);
-        rawData[GEO_AREA_POS_LONGITUDE_OFFSET + 2] = (byte) (longitude >> 8);
-        rawData[GEO_AREA_POS_LONGITUDE_OFFSET + 3] = (byte) longitude;
+        position.writeTo(rawData, GEO_AREA_POS_OFFSET);
         rawData[DISTANCE_A_OFFSET] = (byte) (distanceA >> 8);
         rawData[DISTANCE_A_OFFSET + 1] = (byte) distanceA;
         rawData[DISTANCE_B_OFFSET] = (byte) (distanceB >> 8);
@@ -141,8 +126,19 @@ public class GnGBCPacketHeader implements GnPacketHeader {
     public String toString() {
         final StringBuilder sb = new StringBuilder();
         final String ls = System.getProperty("line.separator");
-        sb.append("[Geobroadcast (").append(length()).append(" bytes)]").append(ls);
-        
+        sb.append("[GeoBroadcast (").append(length()).append(" bytes)]").append(ls);
+        sb.append("  Sequence Number: ").append(sequenceNumber & 0xFFFF).append(ls);
+        sb.append("  Reserved: 0x").append(ByteArrays.toHexString(reserved1, "")).append(ls);
+        sb.append("  Source Position Vector").append(ls);
+        sb.append(source.buildString("    "));
+        sb.append(position.buildString("  "));
+        sb.append("  Distance A: ").append(distanceA & 0xFFFF).append(" m (");
+        sb.append(distanceA & 0xFFFF).append(')').append(ls);
+        sb.append("  Distance B: ").append(distanceB & 0xFFFF).append(" m (");
+        sb.append(distanceB & 0xFFFF).append(')').append(ls);
+        sb.append("  Angle: ").append(angle & 0xFFFF).append("\u00b0 (");
+        sb.append(angle & 0xFFFF).append(')').append(ls);
+        sb.append("  Reserved: 0x").append(ByteArrays.toHexString(reserved2, "")).append(ls);
         return sb.toString();
     }
 
@@ -153,8 +149,7 @@ public class GnGBCPacketHeader implements GnPacketHeader {
             return this.sequenceNumber == that.sequenceNumber
                     && this.reserved1 == that.reserved2
                     && this.source.equals(that.source)
-                    && this.latitude == that.latitude
-                    && this.longitude == that.longitude
+                    && this.position.equals(that.position)
                     && this.distanceA == that.distanceA
                     && this.distanceB == that.distanceB
                     && this.angle == that.angle
@@ -169,8 +164,7 @@ public class GnGBCPacketHeader implements GnPacketHeader {
         hash = hash * 41 + sequenceNumber;
         hash = hash * 41 + reserved1;
         hash = hash * 41 + source.hashCode();
-        hash = hash * 41 + latitude;
-        hash = hash * 41 + longitude;
+        hash = hash * 41 + position.hashCode();
         hash = hash * 41 + distanceA;
         hash = hash * 41 + distanceB;
         hash = hash * 41 + angle;

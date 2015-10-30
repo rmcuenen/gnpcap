@@ -1,6 +1,7 @@
 package cuenen.raymond.gn.packet.factory;
 
-import cuenen.raymond.gn.packet.CohdaWirelessPacket;
+import cuenen.raymond.gn.packet.CohdaWirelessRxPacket;
+import cuenen.raymond.gn.packet.CohdaWirelessTxPacket;
 import cuenen.raymond.gn.packet.namednumber.NamedNumberTypes;
 import org.pcap4j.packet.EthernetPacket;
 import org.pcap4j.packet.IllegalRawDataException;
@@ -12,16 +13,28 @@ public final class GnDataLinkTypePacketFactory extends AbstractGnPacketFactory<D
     private static final GnDataLinkTypePacketFactory INSTANCE = new GnDataLinkTypePacketFactory();
 
     private GnDataLinkTypePacketFactory() {
-        instantiaters.put(NamedNumberTypes.COHDA_WIRELESS, new PacketInstantiater() {
+        instantiaters.put(NamedNumberTypes.COHDA_WIRELESS_TX, new PacketInstantiater() {
 
             @Override
             public Packet newInstance(byte[] rawData, int offset, int length) throws IllegalRawDataException {
-                return CohdaWirelessPacket.newPacket(rawData, offset, length);
+                return CohdaWirelessTxPacket.newPacket(rawData, offset, length);
             }
 
             @Override
             public Class<? extends Packet> getTargetClass() {
-                return CohdaWirelessPacket.class;
+                return CohdaWirelessTxPacket.class;
+            }
+        });
+        instantiaters.put(NamedNumberTypes.COHDA_WIRELESS_RX, new PacketInstantiater() {
+
+            @Override
+            public Packet newInstance(byte[] rawData, int offset, int length) throws IllegalRawDataException {
+                return CohdaWirelessRxPacket.newPacket(rawData, offset, length);
+            }
+
+            @Override
+            public Class<? extends Packet> getTargetClass() {
+                return CohdaWirelessRxPacket.class;
             }
         });
         instantiaters.put(DataLinkType.EN10MB, new PacketInstantiater() {

@@ -39,7 +39,6 @@ public final class LongPositionVector extends ShortPositionVector {
             throw new IllegalRawDataException("The data is too short to build a Long Position Vector");
         }
         final short val = ByteArrays.getShort(rawData, PAI_S_OFFSET + offset);
-        System.out.println(Integer.toHexString(val));
         pai = (byte) ((val & 0x8000) >> 15);
         speed = (short) (val & 0x7FFF);
         heading = ByteArrays.getShort(rawData, H_OFFSET + offset);

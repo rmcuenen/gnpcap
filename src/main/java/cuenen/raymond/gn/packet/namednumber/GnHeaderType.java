@@ -6,7 +6,7 @@ import org.pcap4j.packet.namednumber.NamedNumber;
 
 public final class GnHeaderType extends NamedNumber<Byte, GnHeaderType> {
 
-    public static final GnHeaderType ANY = new GnHeaderType((byte) 0, "Unspecified");
+    public static final GnHeaderType ANY = new GnHeaderType((byte) 0, "Any");
     public static final GnHeaderType COMMON_HEADER = new GnHeaderType((byte) 1, "Common");
     public static final GnHeaderType SECURE_HEADER = new GnHeaderType((byte) 2, "Secured");
 
@@ -25,9 +25,8 @@ public final class GnHeaderType extends NamedNumber<Byte, GnHeaderType> {
     public static GnHeaderType getInstance(Byte value) {
         if (registry.containsKey(value)) {
             return registry.get(value);
-        } else {
-            return new GnHeaderType(value, "unknown");
         }
+        return new GnHeaderType(value, "Unknown");
     }
 
     public static GnHeaderType register(GnHeaderType type) {

@@ -45,9 +45,8 @@ public final class ItsStationType extends NamedNumber<Integer, ItsStationType> {
     public static ItsStationType getInstance(Integer value) {
         if (registry.containsKey(value)) {
             return registry.get(value);
-        } else {
-            return new ItsStationType(value, "Unknown");
         }
+        return new ItsStationType(value, "Unknown");
     }
 
     public static ItsStationType register(ItsStationType type) {

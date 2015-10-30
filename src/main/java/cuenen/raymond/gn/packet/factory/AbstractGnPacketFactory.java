@@ -41,7 +41,7 @@ public abstract class AbstractGnPacketFactory<N extends NamedNumber<?, ?>> imple
     @Override
     public Class<? extends Packet> getTargetClass(N number) {
         final PacketInstantiater pi = instantiaters.get(number);
-        return pi != null ? pi.getTargetClass() : getTargetClass();
+        return pi == null ? getTargetClass() : pi.getTargetClass();
     }
 
     @Override

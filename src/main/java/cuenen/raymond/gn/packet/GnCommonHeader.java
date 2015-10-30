@@ -1,6 +1,8 @@
 package cuenen.raymond.gn.packet;
 
 import cuenen.raymond.gn.packet.GeoNetworkingPacket.GnHeader;
+import cuenen.raymond.gn.packet.namednumber.GnExtendedHeaderType;
+import cuenen.raymond.gn.packet.namednumber.GnPacketHeaderSubtype;
 import cuenen.raymond.gn.packet.namednumber.GnPacketHeaderType;
 import cuenen.raymond.gn.packet.namednumber.GnTransportType;
 import cuenen.raymond.gn.util.BitValues;
@@ -28,7 +30,7 @@ public final class GnCommonHeader implements GnHeader {
 
     private final GnTransportType nextHeader;
     private final byte reserved1;
-    private final GnPacketHeaderType extendedHeader;
+    private final GnExtendedHeaderType extendedHeader;
     private final byte trafficClass;
     private final byte flags;
     private final short payloadLength;
@@ -58,7 +60,10 @@ public final class GnCommonHeader implements GnHeader {
         byte val = ByteArrays.getByte(rawData, NH_OFFSET + offset);
         nextHeader = GnTransportType.getInstance((byte) ((val >> 4) & 0x0F));
         reserved1 = (byte) (val & 0x0F);
-        extendedHeader = GnPacketHeaderType.getInstance(ByteArrays.getByte(rawData, HT_HST_OFFSET + offset));
+        val = ByteArrays.getByte(rawData, HT_HST_OFFSET + offset);
+        final GnPacketHeaderType ht = GnPacketHeaderType.getInstance((byte) ((val >> 4) & 0x0F));
+        final GnPacketHeaderSubtype hst = GnPacketHeaderSubtype.getInstance(ht, (byte) (val & 0x0F));
+        extendedHeader = GnExtendedHeaderType.newInstance(ht, hst);
         trafficClass = ByteArrays.getByte(rawData, TC_OFFSET + offset);
         flags = ByteArrays.getByte(rawData, FLAGS_OFFSET + offset);
         payloadLength = ByteArrays.getShort(rawData, PL_OFFSET + offset);
@@ -74,7 +79,7 @@ public final class GnCommonHeader implements GnHeader {
         return reserved1;
     }
 
-    public GnPacketHeaderType getExtendedHeader() {
+    public GnExtendedHeaderType getExtendedHeader() {
         return extendedHeader;
     }
 
@@ -129,9 +134,9 @@ public final class GnCommonHeader implements GnHeader {
         final int headerType = BitValues.getValue(extendedHeader.value(), 0, 4);
         final int headerSubtype = BitValues.getValue(extendedHeader.value(), 4, 4);
         sb.append("  ").append(BitValues.toBinaryString(headerType, 4));
-        sb.append(".... = Header Type: ").append(extendedHeader).append(ls);
+        sb.append(".... = Header Type: ").append(extendedHeader.getHeaderType()).append(ls);
         sb.append("  ....").append(BitValues.toBinaryString(headerSubtype, 4));
-        sb.append(" = Header Subtype: ").append(extendedHeader.getSubtype()).append(ls);
+        sb.append(" = Header Subtype: ").append(extendedHeader.getHeaderSubtype()).append(ls);
         sb.append("  Traffic Class: 0x").append(ByteArrays.toHexString(trafficClass, "")).append(ls);
         final int scf = BitValues.getValue(trafficClass, 0, 1);
         final int channelOffload = BitValues.getValue(trafficClass, 1, 1);

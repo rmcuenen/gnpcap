@@ -13,9 +13,9 @@ import org.pcap4j.packet.namednumber.DataLinkType;
 import org.pcap4j.util.ByteArrays;
 import static org.pcap4j.util.ByteArrays.*;
 
-public final class CohdaWirelessPacket extends AbstractPacket {
+public final class CohdaWirelessRxPacket extends AbstractPacket {
 
-    private final CohdaWirelessHeader header;
+    private final CohdaWirelessRxHeader header;
     private final Packet payload;
 
     /**
@@ -26,17 +26,17 @@ public final class CohdaWirelessPacket extends AbstractPacket {
      * @param rawData
      * @param offset
      * @param length
-     * @return a new CohdaWirelessPacket object.
+     * @return a new CohdaWirelessRxPacket object.
      * @throws IllegalRawDataException
      */
-    public static CohdaWirelessPacket newPacket(byte[] rawData, int offset, int length)
+    public static CohdaWirelessRxPacket newPacket(byte[] rawData, int offset, int length)
             throws IllegalRawDataException {
         ByteArrays.validateBounds(rawData, offset, length);
-        return new CohdaWirelessPacket(rawData, offset, length);
+        return new CohdaWirelessRxPacket(rawData, offset, length);
     }
 
-    private CohdaWirelessPacket(byte[] rawData, int offset, int length) throws IllegalRawDataException {
-        header = new CohdaWirelessHeader(rawData, offset, length);
+    private CohdaWirelessRxPacket(byte[] rawData, int offset, int length) throws IllegalRawDataException {
+        header = new CohdaWirelessRxHeader(rawData, offset, length);
         final int payloadLength = length - header.length();
         if (payloadLength > 0) {
             final int payloadOffset = offset + header.length();
@@ -47,13 +47,13 @@ public final class CohdaWirelessPacket extends AbstractPacket {
         }
     }
 
-    private CohdaWirelessPacket(Builder builder) {
+    private CohdaWirelessRxPacket(Builder builder) {
         payload = builder.payloadBuilder == null ? null : builder.payloadBuilder.build();
-        header = new CohdaWirelessHeader(builder);
+        header = new CohdaWirelessRxHeader(builder);
     }
 
     @Override
-    public CohdaWirelessHeader getHeader() {
+    public CohdaWirelessRxHeader getHeader() {
         return header;
     }
 
@@ -99,7 +99,7 @@ public final class CohdaWirelessPacket extends AbstractPacket {
         public Builder() {
         }
 
-        public Builder(CohdaWirelessPacket packet) {
+        public Builder(CohdaWirelessRxPacket packet) {
             channelNumber = packet.header.channelNumber;
             priority = packet.header.priority;
             service = packet.header.service;
@@ -206,11 +206,11 @@ public final class CohdaWirelessPacket extends AbstractPacket {
 
         @Override
         public Packet build() {
-            return new CohdaWirelessPacket(this);
+            return new CohdaWirelessRxPacket(this);
         }
     }
 
-    public static final class CohdaWirelessHeader extends AbstractHeader {
+    public static final class CohdaWirelessRxHeader extends AbstractHeader {
 
         private static final int CHANNEL_NUMBER_OFFSET = 0;
         private static final int CHANNEL_NUMBER_SIZE = BYTE_SIZE_IN_BYTES;
@@ -242,7 +242,7 @@ public final class CohdaWirelessPacket extends AbstractPacket {
         private static final int TRICE_SIZE = BYTE_SIZE_IN_BYTES;
         private static final int FINE_FREQ_OFFSET = TRICE_OFFSET + TRICE_SIZE;
         private static final int FINE_FREQ_SIZE = INT_SIZE_IN_BYTES - TRICE_SIZE;
-        private static final int COHDA_WIRELESS_HEADER_SIZE = FINE_FREQ_OFFSET + FINE_FREQ_SIZE;
+        private static final int COHDA_WIRELESS_RX_HEADER_SIZE = FINE_FREQ_OFFSET + FINE_FREQ_SIZE;
 
         private final byte channelNumber;
         private final byte priority;
@@ -260,8 +260,8 @@ public final class CohdaWirelessPacket extends AbstractPacket {
         private final byte trice;
         private final int fineFreq;
 
-        private CohdaWirelessHeader(byte[] rawData, int offset, int length) throws IllegalRawDataException {
-            if (length < COHDA_WIRELESS_HEADER_SIZE) {
+        private CohdaWirelessRxHeader(byte[] rawData, int offset, int length) throws IllegalRawDataException {
+            if (length < COHDA_WIRELESS_RX_HEADER_SIZE) {
                 throw new IllegalRawDataException("The data is too short to build a Cohda Wireless proprietary header");
             }
             channelNumber = ByteArrays.getByte(rawData, CHANNEL_NUMBER_OFFSET + offset);
@@ -281,7 +281,7 @@ public final class CohdaWirelessPacket extends AbstractPacket {
             fineFreq = ByteArrays.getInt(rawData, FINE_FREQ_OFFSET + offset, FINE_FREQ_SIZE, ByteOrder.LITTLE_ENDIAN);
         }
 
-        private CohdaWirelessHeader(Builder builder) {
+        private CohdaWirelessRxHeader(Builder builder) {
             channelNumber = builder.channelNumber;
             priority = builder.priority;
             service = builder.service;
@@ -382,7 +382,7 @@ public final class CohdaWirelessPacket extends AbstractPacket {
 
         @Override
         public int length() {
-            return COHDA_WIRELESS_HEADER_SIZE;
+            return COHDA_WIRELESS_RX_HEADER_SIZE;
         }
 
         @Override
@@ -390,7 +390,7 @@ public final class CohdaWirelessPacket extends AbstractPacket {
             final StringBuilder sb = new StringBuilder();
             final String ls = System.getProperty("line.separator");
             sb.append("[Cohda Header (").append(length()).append(" bytes)]").append(ls);
-            sb.append("  ChannelNuhmber: ").append(channelNumber & 0xFF).append(ls);
+            sb.append("  ChannelNumber: ").append(channelNumber & 0xFF).append(ls);
             sb.append("  Priority: ").append(priority & 0xFF).append(ls);
             sb.append("  Service: ").append(service & 0xFF).append(ls); // NamedNumber?
             sb.append("  MCS: ").append(mcs & 0xFF).append(ls); // NamedNumber?
@@ -429,8 +429,8 @@ public final class CohdaWirelessPacket extends AbstractPacket {
 
         @Override
         public boolean equals(Object obj) {
-            if (obj instanceof CohdaWirelessHeader) {
-                CohdaWirelessHeader that = (CohdaWirelessHeader) obj;
+            if (obj instanceof CohdaWirelessRxHeader) {
+                CohdaWirelessRxHeader that = (CohdaWirelessRxHeader) obj;
                 return this.channelNumber == that.channelNumber
                         && this.priority == that.priority
                         && this.service == that.service

@@ -6,7 +6,7 @@ import org.pcap4j.packet.namednumber.NamedNumber;
 
 public final class GnTransportType extends NamedNumber<Byte, GnTransportType> {
 
-    public static final GnTransportType ANY = new GnTransportType((byte) 0, "Unspecified");
+    public static final GnTransportType ANY = new GnTransportType((byte) 0, "Any");
     public static final GnTransportType BTP_A = new GnTransportType((byte) 1, "BTP-A");
     public static final GnTransportType BTP_B = new GnTransportType((byte) 2, "BTP-B");
     public static final GnTransportType IPV6 = new GnTransportType((byte) 3, "IPv6");
@@ -27,9 +27,8 @@ public final class GnTransportType extends NamedNumber<Byte, GnTransportType> {
     public static GnTransportType getInstance(Byte value) {
         if (registry.containsKey(value)) {
             return registry.get(value);
-        } else {
-            return new GnTransportType(value, "unknown");
         }
+        return new GnTransportType(value, "unknown");
     }
 
     public static GnTransportType register(GnTransportType type) {

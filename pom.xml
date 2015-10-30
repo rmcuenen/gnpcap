@@ -9,20 +9,14 @@
     <packaging>jar</packaging>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <pcap4j.version>1.4.0</pcap4j.version>
-        <maven-compiler-plugin.version>3.2</maven-compiler-plugin.version>
+        <pcap4j.version>1.6.1</pcap4j.version>
+        <maven-compiler-plugin.version>3.3</maven-compiler-plugin.version>
     </properties>
     <dependencies>
         <dependency>
             <groupId>org.pcap4j</groupId>
             <artifactId>pcap4j-core</artifactId>
             <version>${pcap4j.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.pcap4j</groupId>
-            <artifactId>pcap4j-packetfactory-static</artifactId>
-            <version>${pcap4j.version}</version>
-            <scope>provided</scope>
         </dependency>
     </dependencies>
     <build>

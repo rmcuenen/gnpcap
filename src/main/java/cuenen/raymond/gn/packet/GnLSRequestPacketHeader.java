@@ -88,7 +88,7 @@ public class GnLSRequestPacketHeader implements GnPacketHeader {
     public String toString() {
         final StringBuilder sb = new StringBuilder();
         final String ls = System.getProperty("line.separator");
-        sb.append("[LS Request (").append(length()).append(" bytes)]").append(ls);
+        sb.append("[Location Service (").append(length()).append(" bytes)]").append(ls);
         sb.append("  Sequence Number: ").append(sequenceNumber & 0xFFFF).append(ls);
         sb.append("  Reserved: 0x").append(ByteArrays.toHexString(reserved, "")).append(ls);
         sb.append("  Source Position Vector").append(ls);

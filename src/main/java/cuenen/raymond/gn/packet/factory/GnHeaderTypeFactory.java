@@ -4,6 +4,7 @@ import cuenen.raymond.gn.packet.GeoNetworkingPacket.GnHeader;
 import cuenen.raymond.gn.packet.GnCommonHeader;
 import cuenen.raymond.gn.packet.GnEmptyHeader;
 import cuenen.raymond.gn.packet.GnMalformedHeader;
+import cuenen.raymond.gn.packet.GnSecureHeader;
 import cuenen.raymond.gn.packet.namednumber.GnHeaderType;
 import java.util.HashMap;
 import java.util.Map;
@@ -26,6 +27,18 @@ public final class GnHeaderTypeFactory implements PacketFactory<GnHeader, GnHead
             @Override
             public Class<? extends GnHeader> getTargetClass() {
                 return GnCommonHeader.class;
+            }
+        });
+        instantiaters.put(GnHeaderType.SECURE_HEADER, new Instantiater() {
+
+            @Override
+            public GnHeader newInstance(byte[] rawData, int offset, int length) throws IllegalRawDataException {
+                return GnSecureHeader.newInstance(rawData, offset, length);
+            }
+
+            @Override
+            public Class<? extends GnHeader> getTargetClass() {
+                return GnSecureHeader.class;
             }
         });
     }
@@ -55,7 +68,7 @@ public final class GnHeaderTypeFactory implements PacketFactory<GnHeader, GnHead
     @Override
     public Class<? extends GnHeader> getTargetClass(GnHeaderType number) {
         Instantiater instantiater = instantiaters.get(number);
-        return instantiater != null ? instantiater.getTargetClass() : getTargetClass();
+        return instantiater == null ? getTargetClass() : instantiater.getTargetClass();
     }
 
     @Override
